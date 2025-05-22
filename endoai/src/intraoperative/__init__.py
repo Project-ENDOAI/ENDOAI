@@ -1,1 +1,1 @@
-# Auto-generated to make this directory a Python package.
+"""Intraoperative (real-time) guidance modules for ENDOAI."""

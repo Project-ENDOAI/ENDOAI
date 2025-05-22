@@ -1,1 +1,1 @@
-# Auto-generated to make this directory a Python package.
+"""Preoperative planning, imaging, and analysis modules for ENDOAI."""

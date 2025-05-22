@@ -22,19 +22,23 @@ For access to private components, please contact us for licensing options.
 
 ```
 endoai/
-├── data/                   # Dataset storage
+├── core/                  # Core utilities and shared logic
+├── data/                  # Dataset storage and data management
 │   ├── raw/               # Raw MRI, ultrasound, surgical video data
 │   ├── processed/         # Preprocessed data (e.g., normalized, resized)
-├── models/                 # Saved models and checkpoints
-├── notebooks/              # Jupyter notebooks for experimentation
-├── src/                    # Source code for each module
-│   ├── preoperative/       # Preoperative planning scripts
-│   ├── intraoperative/     # Real-time guidance scripts
-│   ├── decision_support/   # Decision support scripts
-│   ├── reporting/          # Reporting tools
-├── tests/                  # Unit tests for all modules
-├── requirements.txt        # Python dependencies
-└── README.md               # Project documentation
+├── models/                # Model definitions and checkpoints
+├── notebooks/             # Jupyter notebooks for experimentation
+├── pipelines/             # End-to-end ML/AI pipelines
+├── src/                   # Source code for each workflow/module
+│   ├── preoperative/      # Preoperative planning scripts
+│   ├── intraoperative/    # Real-time guidance scripts
+│   ├── decision_support/  # Decision support scripts
+│   ├── reporting/         # Reporting tools
+├── tests/                 # Unit and integration tests
+├── install/               # Installation and environment setup scripts
+├── requirements.txt       # Python dependencies
+├── README.md              # Project documentation (this file)
+└── LICENSE
 ```
 
 ## Getting Started
@@ -59,10 +63,16 @@ endoai/
 4. Explore the project:
    - Use `notebooks/` for experimentation.
    - Refer to `src/` for modular scripts.
+   - See `install/` for setup and environment scripts.
 
 ## Contributing
 
 We welcome contributions to the public components of ENDOAI. Please submit a pull request or open an issue for any suggestions or improvements.
+
+## Coding Standards & AI Assistant Configuration
+
+- See [COPILOT.md](../../COPILOT.md) for coding standards and preferences.
+- See [.copilot/](../../.copilot/) for Copilot and AI assistant configuration and context files.
 
 ## License
 

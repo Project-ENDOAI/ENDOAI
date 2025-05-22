@@ -1,1 +1,1 @@
-# Auto-generated to make this directory a Python package.
+"""Preprocessed, normalized, or resized data for ENDOAI."""

@@ -9,3 +9,8 @@ opencv-python
 pydicom
 nibabel
 tqdm
+monai[all]
+SimpleITK
+plotly
+scipy
+detectron2

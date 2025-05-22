@@ -41,3 +41,31 @@ def train_model(dataset, epochs=10, batch_size=2, lr=1e-4, model_save_path="mode
         print(f"Epoch {epoch+1}, Loss: {epoch_loss:.4f}")
     torch.save(model.state_dict(), model_save_path)
     print(f"Model saved to {model_save_path}")
+
+if __name__ == "__main__":
+    """
+    Example usage: Run this script to train the model.
+    You should import or create your dataset before calling train_model.
+    """
+    # Example: Import the preprocessing pipeline and create the dataset
+    from preprocessing_pipeline import create_preprocessed_dataset
+
+    # For early training, you can use a public dataset such as the Medical Segmentation Decathlon (MSD).
+    # Download the "Task04_Hippocampus" or similar dataset from:
+    # https://msd-for-monai.s3-us-west-2.amazonaws.com/Task04_Hippocampus.tar
+
+    # After downloading and extracting, set the paths below to the images and labels folders.
+    # For demonstration, we use the MSD Hippocampus task as an example.
+    # Adjust these paths to match your extracted dataset structure.
+
+    images_dir = "data/public/Task04_Hippocampus/imagesTr"
+    labels_dir = "data/public/Task04_Hippocampus/labelsTr"
+
+    if not (os.path.isdir(images_dir) and os.path.isdir(labels_dir)):
+        print("Error: Public dataset not found. Please download and extract the Medical Segmentation Decathlon Task04_Hippocampus dataset.")
+        print("Download link: https://msd-for-monai.s3-us-west-2.amazonaws.com/Task04_Hippocampus.tar")
+        print("After extraction, set images_dir and labels_dir accordingly.")
+        exit(1)
+
+    dataset = create_preprocessed_dataset(images_dir, labels_dir)
+    train_model(dataset)

@@ -34,6 +34,18 @@ This folder contains code and resources for **preoperative planning** in the END
 - Adjust script paths and arguments as needed for your environment and data.
 - See each script’s docstring or help message for more details.
 
+## Running Training
+
+You can run `train.py` directly:
+
+```bash
+python -m endoai.src.preoperative.train
+```
+
+Or, for more flexibility and reproducibility, you may create a separate script (e.g., `scripts/run_training.py`) to set up environment variables, logging, or experiment tracking, and then call the training module. This is especially useful if you want to automate multiple experiments or integrate with MLflow, Weights & Biases, or a job scheduler.
+
+**For most users, running `train.py` directly is sufficient for initial experiments.**
+
 ## Example: Building a Simple Segmentation Model with MONAI
 
 ### 1. Data Preparation

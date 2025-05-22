@@ -2,7 +2,7 @@ import os
 import numpy as np
 import torch
 from monai.transforms import (
-    Compose, LoadImage, AddChannel, ScaleIntensity, EnsureType, ToTensor
+    Compose, LoadImage, EnsureChannelFirst, ScaleIntensity, EnsureType
 )
 from monai.networks.nets import UNet
 from monai.data import Dataset, DataLoader
@@ -14,7 +14,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # Define data transforms
 transforms = Compose([
     LoadImage(image_only=True),
-    AddChannel(),
+    EnsureChannelFirst(),
     ScaleIntensity(),
     EnsureType()
 ])
@@ -33,7 +33,7 @@ train_loader = DataLoader(train_ds, batch_size=2, shuffle=True)
 
 # Define U-Net model
 model = UNet(
-    dimensions=3,
+    spatial_dims=3,
     in_channels=1,
     out_channels=2,
     channels=(16, 32, 64, 128, 256),

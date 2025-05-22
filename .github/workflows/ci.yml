@@ -1,0 +1,39 @@
+name: ENDOAI CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r endoai/requirements.txt
+          pip install flake8 pytest
+
+      - name: Lint with flake8
+        run: |
+          flake8 endoai/
+
+      - name: Run unit tests
+        run: |
+          pytest endoai/tests/
+
+      - name: Build documentation (if Sphinx is configured)
+        run: |
+          if [ -f docs/Makefile ]; then
+            pip install sphinx
+            make -C docs html
+          fi

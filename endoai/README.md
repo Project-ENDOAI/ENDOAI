@@ -65,6 +65,26 @@ endoai/
    - Refer to `src/` for modular scripts.
    - See `install/` for setup and environment scripts.
 
+## Documentation
+
+ENDOAI provides modular documentation for each major component:
+
+- [core/README.md](core/README.md): Core utilities and shared logic.
+- [data/README.md](data/README.md): Data management, raw and processed data.
+- [models/README.md](models/README.md): Model definitions and guidelines.
+- [notebooks/README.md](notebooks/README.md): Jupyter notebooks for experimentation.
+- [pipelines/README.md](pipelines/README.md): End-to-end ML/AI pipelines.
+- [src/README.md](src/README.md): Main source code modules.
+- [src/preoperative/README.md](src/preoperative/README.md): Preoperative planning and segmentation.
+- [src/intraoperative/README.md](src/intraoperative/README.md): Intraoperative (real-time) guidance.
+- [src/decision_support/README.md](src/decision_support/README.md): Decision support algorithms.
+- [src/reporting/README.md](src/reporting/README.md): Reporting and visualization tools.
+- [tests/README.md](../tests/README.md): Unit and integration tests.
+- [install/README.md](../install/README.md): Installation and environment setup.
+- [validation/README.md](../validation/README.md): Model evaluation and validation.
+
+For detailed usage, see the documentation in each folder and the [COPILOT.md](../../COPILOT.md) for coding standards.
+
 ## Contributing
 
 We welcome contributions to the public components of ENDOAI. Please submit a pull request or open an issue for any suggestions or improvements.

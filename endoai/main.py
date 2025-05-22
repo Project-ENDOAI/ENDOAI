@@ -12,14 +12,21 @@ License: See LICENSE file
 """
 
 import sys
+import os
+import logging
+from endoai.core.logger import get_logger
+
+# Ensure the parent directory is in sys.path for local imports
+sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 
 def main():
     """
     Main function for ENDOAI.
     Extend this function to provide CLI, pipeline orchestration, or other entrypoint logic.
     """
-    print("Welcome to ENDOAI!")
-    print("This is the main entry point. Extend this script to launch pipelines or tools.")
+    logger = get_logger(__name__)
+    logger.info("Welcome to ENDOAI!")
+    logger.info("This is the main entry point. Extend this script to launch pipelines or tools.")
     # ...existing code...
 
 if __name__ == "__main__":

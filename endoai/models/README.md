@@ -2,15 +2,12 @@
 
 This directory contains model definitions, checkpoints, and related utilities for ENDOAI.
 
-## Purpose
-
-- Store model architectures and saved weights.
-- Organize model training and inference scripts.
-
 ## Guidelines
 
-- Document model architectures and training procedures.
-- Use clear naming conventions for checkpoints.
+- Store only model architecture code and configuration here.
+- Do **not** commit large model weights or checkpoints (`.pth`, `.pt`, `.h5`, `.ckpt`, `.onnx`).
+- Use the `checkpoints/` or `weights/` subfolders for storing large files locally (these are gitignored).
+- Document each model and its intended use.
 
 ## See Also
 

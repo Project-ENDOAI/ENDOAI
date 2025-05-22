@@ -61,3 +61,5 @@ for epoch in range(epochs):
 
 # Save model
 torch.save(model.state_dict(), "models/mri_segmentation.pth")
+
+# This file is now superseded by the modular pipeline in preprocessing_pipeline.py, model.py, train.py, and validation/evaluate.py.

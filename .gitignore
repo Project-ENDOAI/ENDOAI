@@ -5,3 +5,21 @@ scripts/git_automation.py
 .vscode/settings.json
 
 venv/
+
+# Ignore sensitive/private folders
+endoai/data/
+endoai/models/
+endoai/notebooks/
+endoai/pipelines/
+
+# Ignore output folder
+output/
+
+# Ignore model weights and large files in models/
+endoai/models/*.pth
+endoai/models/*.pt
+endoai/models/*.h5
+endoai/models/*.ckpt
+endoai/models/*.onnx
+endoai/models/checkpoints/
+endoai/models/weights/

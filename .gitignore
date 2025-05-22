@@ -1,0 +1,7 @@
+git_automation_output.txt
+
+# Exclude git_automation.py and VSCode settings
+scripts/git_automation.py
+.vscode/settings.json
+
+venv/

@@ -1,0 +1,20 @@
+name: endoai
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - python=3.9
+  - numpy
+  - pandas
+  - scikit-learn
+  - matplotlib
+  - jupyterlab
+  - pytorch
+  - torchvision
+  - cudatoolkit=11.3  # Adjust based on your GPU
+  - pip
+  - pip:
+      - opencv-python
+      - pydicom
+      - nibabel
+      - tqdm

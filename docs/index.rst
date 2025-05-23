@@ -7,6 +7,9 @@ ENDOAI Documentation
 
    usage
    modules
+   contributing
+   testing
+   deployment
 
 Indices and tables
 ==================

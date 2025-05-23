@@ -1,25 +1,8 @@
 # ENDOAI
 
-ENDOAI is an advanced AI-based toolkit for the **diagnosis and surgical management of endometriosis**. This repository contains the **public components** of ENDOAI, including preprocessing scripts, basic segmentation pipelines, and educational materials.
-
-## Public vs. Private Components
-
-### Public Components (This Repository)
-- Preprocessing scripts for MRI and ultrasound data.
-- Basic segmentation pipelines (e.g., 3D U-Net implementation).
-- Documentation, tutorials, and sample datasets.
-
-### Private Components (Proprietary)
-- Fine-tuned AI models (e.g., Swin-UNet, ensemble models).
-- Proprietary datasets and annotations.
-- Advanced risk mapping algorithms.
-- Full-featured UI for surgical planning.
-- APIs for premium features (e.g., lesion detection, risk mapping).
-
-For access to private components, please contact us for licensing options.
+ENDOAI is a project focused on developing AI-driven solutions for endometriosis diagnosis, treatment planning, and postoperative analysis.
 
 ## Project Structure
-
 ```
 endoai/
 ├── core/                  # Core utilities and shared logic

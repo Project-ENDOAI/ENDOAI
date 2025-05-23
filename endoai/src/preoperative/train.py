@@ -22,10 +22,15 @@ def train_model(dataset, epochs=10, batch_size=2, lr=1e-4, model_save_path="mode
     """
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
-    model = get_unet_model()
+    
+    # Change output channels to 1 for binary segmentation
+    model = get_unet_model(out_channels=1)
+    
     optimizer = Adam(model.parameters(), lr=lr)
-    loss_function = DiceLoss(to_onehot_y=True, softmax=True)
-
+    
+    # Use binary cross entropy loss for single channel output
+    loss_function = torch.nn.BCEWithLogitsLoss()
+    
     for epoch in range(epochs):
         model.train()
         epoch_loss = 0
@@ -48,6 +53,9 @@ def train_model(dataset, epochs=10, batch_size=2, lr=1e-4, model_save_path="mode
                 print(f"Error during forward/backward pass: {e}")
                 raise
         print(f"Epoch {epoch+1}, Loss: {epoch_loss:.4f}")
+    
+    # Create directories if they don't exist
+    os.makedirs(os.path.dirname(os.path.abspath(model_save_path)), exist_ok=True)
     torch.save(model.state_dict(), model_save_path)
     print(f"Model saved to {model_save_path}")
 

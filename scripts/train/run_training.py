@@ -39,6 +39,20 @@ formatter = logging.Formatter("%(asctime)s %(levelname)s %(message)s")
 console.setFormatter(formatter)
 logging.getLogger().addHandler(console)
 
+# Check and install required dependencies
+required_packages = ["nibabel", "pydicom", "itk", "nrrd"]
+for package in required_packages:
+    try:
+        __import__(package)
+    except ImportError:
+        logging.info(f"{package} not installed. Attempting to install via pip...")
+        try:
+            subprocess.check_call([sys.executable, "-m", "pip", "install", package])
+            logging.info(f"{package} installed successfully.")
+        except Exception as e:
+            logging.error(f"Failed to install {package}: {e}")
+            sys.exit(1)
+
 # Set WANDB_API_KEY from VSCode settings.json if available
 wandb_api_key = os.environ.get("WANDB_API_KEY")
 if not wandb_api_key:
@@ -126,10 +140,57 @@ if not (os.path.isdir(images_dir) and os.path.isdir(labels_dir)):
 # Call the training module
 exit_code = os.system("python -m endoai.src.preoperative.train")
 
-if WANDB_AVAILABLE:
-    wandb.finish()
-
 if exit_code == 0:
     logging.info("Training completed successfully.")
+    
+    # Post-training steps
+    logging.info("Starting model evaluation...")
+    
+    # 1. Evaluate on validation set
+    model_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "models", "lesion_segmentation.pth"))
+    if os.path.exists(model_path):
+        logging.info(f"Found trained model at {model_path}")
+        
+        # Run the evaluation script
+        try:
+            logging.info("Running evaluation script...")
+            eval_script_path = os.path.join(os.path.dirname(__file__), "..", "..", "endoai", "validation", "evaluate.py")
+            
+            if os.path.exists(eval_script_path):
+                eval_cmd = f"{sys.executable} {eval_script_path} --model-path={model_path} --data-dir={os.path.dirname(images_dir)}"
+                eval_exit_code = os.system(eval_cmd)
+                
+                # Log performance metrics to wandb if available
+                if WANDB_AVAILABLE and eval_exit_code == 0:
+                    try:
+                        # Log model artifact to wandb for versioning
+                        artifact = wandb.Artifact(
+                            name="lesion_segmentation_model", 
+                            type="model"
+                        )
+                        artifact.add_file(model_path)
+                        wandb.log_artifact(artifact)
+                        
+                        # You can also log metrics directly from evaluation results
+                        # wandb.log({"val_dice": eval_dice_score, "val_loss": eval_loss})
+                    except Exception as e:
+                        logging.error(f"Error logging artifact to wandb: {e}")
+            else:
+                logging.warning(f"Evaluation script not found at {eval_script_path}")
+        except Exception as e:
+            logging.error(f"Error during model evaluation: {e}")
+    else:
+        logging.warning(f"Trained model not found at {model_path}")
+    
+    # Suggest next steps to the user
+    print("\n==== NEXT STEPS ====")
+    print("1. View model performance in the wandb dashboard")
+    print("2. Test the model with new data using scripts/inference/predict.py")
+    print("3. Fine-tune hyperparameters to improve performance")
+    print("4. Export the model for deployment")
+    print("====================\n")
 else:
     logging.error(f"Training failed with exit code {exit_code}.")
+
+if WANDB_AVAILABLE:
+    wandb.finish()

@@ -2,7 +2,14 @@ import cProfile
 import pstats
 import io
 import os
-from main import main_function  # Replace with the actual entry point of your application
+
+# Try importing 'main' and handle import errors
+try:
+    from main import main_function  # Replace with the actual entry point of your application
+except ImportError as e:
+    print(f"Error importing 'main': {e}")
+    print("Ensure that 'main.py' exists in the same directory as this script and contains 'main_function'.")
+    raise
 
 def profile(output_file="profile_output.txt", sort_by="cumulative", lines=50):
     """

@@ -1,8 +1,9 @@
 """
 Module for sensor fusion in intraoperative endometriosis surgery.
 
-This module provides classes and functions for integrating data from multiple 
-sensor types to provide comprehensive real-time analysis and guidance during surgery.
+This module integrates data from multiple sensor types, such as visual, force, and motion sensors,
+to provide a unified representation for real-time surgical guidance. It includes feature-level
+and decision-level fusion strategies.
 """
 
 import numpy as np

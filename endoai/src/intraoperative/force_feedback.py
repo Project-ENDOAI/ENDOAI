@@ -1,8 +1,9 @@
 """
-Module for processing force feedback and tactile sensor data in endometriosis surgery.
+Module for processing force and tactile sensor data in intraoperative endometriosis surgery.
 
-This module handles data from force feedback sensors, tip pressure sensors, 
-and haptic feedback systems to provide tissue resistance information and safety alerts.
+This module processes data from force feedback sensors, tip pressure sensors, and haptic
+feedback systems to provide real-time tissue resistance information and safety alerts.
+It includes tools for tissue characterization and haptic feedback generation.
 """
 
 import numpy as np

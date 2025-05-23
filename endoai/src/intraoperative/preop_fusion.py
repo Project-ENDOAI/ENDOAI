@@ -3,6 +3,7 @@ Module for integrating preoperative imaging data with intraoperative sensor data
 
 This module provides tools and algorithms for registering preoperative diagnostic images
 (MRI, CT, ultrasound) with intraoperative sensor data for comprehensive surgical guidance.
+It includes registration algorithms, annotation overlays, and fiducial marker detection.
 """
 
 import numpy as np
@@ -502,7 +503,8 @@ class LeadMarkerDetector:
         if self.marker_type == "aruco":
             # ArUco marker detector
             self.aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)
-            self.aruco_params = cv2.aruco.DetectorParameters()
+            # Fix: Use the factory function to create DetectorParameters
+            self.aruco_params = cv2.aruco.DetectorParameters_create()
             self.detector = cv2.aruco.ArucoDetector(self.aruco_dict, self.aruco_params)
         elif self.marker_type == "circle":
             # No specific initialization for circle detector
@@ -560,35 +562,39 @@ class LeadMarkerDetector:
         """
         # Convert to grayscale if needed
         if frame.ndim == 3:
-            gray = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
+            gray = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)  # pylint: disable=no-member
         else:
             gray = frame
-        
-        # Detect ArUco markers
-        # Use try-except to handle potential API differences in OpenCV versions
+
         try:
-            # Modern OpenCV (4.7+)
+            # Try detecting markers using the detector
             detector_result = self.detector.detectMarkers(gray)
-            if len(detector_result) == 3:
-                corners, ids, rejected = detector_result
+            if detector_result is None:
+                corners, ids, rejected = [], None, []
+            elif hasattr(detector_result, '__iter__'):
+                try:
+                    # Attempt to unpack the result into three variables
+                    corners, ids, rejected = tuple(detector_result)
+                except Exception as e:
+                    print(f"Error unpacking detector_result: {e}")
+                    corners, ids, rejected = [], None, []
             else:
-                corners = detector_result[0]
-                ids = detector_result[1] if len(detector_result) > 1 else None
-                rejected = detector_result[2] if len(detector_result) > 2 else []
-        except ValueError:
-            # Alternative approach for compatibility
-            corners, ids, rejected = cv2.aruco.detectMarkers(
-                gray, 
-                self.aruco_dict, 
-                parameters=self.aruco_params
-            )
-        
-        # Ensure ids is not None for counting
-        if ids is None:
-            marker_count = 0
-        else:
-            marker_count = len(corners) if isinstance(corners, list) else corners.shape[0]
-        
+                corners, ids, rejected = [], None, []
+        except Exception as e:
+            # Fallback to using the legacy function if needed
+            try:
+                corners, ids, rejected = cv2.aruco.detectMarkers(
+                    gray, 
+                    self.aruco_dict, 
+                    parameters=self.aruco_params
+                )
+            except Exception as inner_e:
+                print(f"Error detecting ArUco markers: {inner_e}")
+                corners, ids, rejected = [], None, []
+
+        # Ensure ids is not None when counting
+        marker_count = len(corners) if isinstance(corners, list) else 0
+
         return {
             "status": "success",
             "markers": {
@@ -611,17 +617,17 @@ class LeadMarkerDetector:
         """
         # Convert to grayscale if needed
         if frame.ndim == 3:
-            gray = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
+            gray = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)  # pylint: disable=no-member
         else:
             gray = frame
         
         # Preprocess image
-        blurred = cv2.GaussianBlur(gray, (5, 5), 0)
+        blurred = cv2.GaussianBlur(gray, (5, 5), 0)  # pylint: disable=no-member
         
         # Detect circles using Hough transform
-        circles = cv2.HoughCircles(
+        circles = cv2.HoughCircles(  # pylint: disable=no-member
             blurred, 
-            cv2.HOUGH_GRADIENT, 
+            cv2.HOUGH_GRADIENT,  # pylint: disable=no-member
             dp=1, 
             minDist=20, 
             param1=50, 

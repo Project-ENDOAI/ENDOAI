@@ -1,8 +1,9 @@
 """
 Module for processing visual sensor data in intraoperative endometriosis surgery.
 
-This module handles data from various visual sensors including laparoscopic cameras,
-stereoscopic cameras, and infrared fluorescence sensors.
+This module handles data from various visual sensors, including laparoscopic cameras,
+stereoscopic cameras, and infrared fluorescence sensors. It provides functionality for
+image enhancement, segmentation, and depth estimation.
 """
 
 import numpy as np
@@ -114,17 +115,17 @@ class LaparoscopicImageProcessor:
         # Convert to float and normalize
         frame_float = frame.astype(np.float32) / 255.0
         
-        # Convert to tensor and add batch dimension
+        # Convert to tensor and add batch dimension (change dims: HWC -> CHW)
         tensor = torch.from_numpy(frame_float).permute(2, 0, 1).unsqueeze(0)
         
         return tensor.to(self.device)
     
     def _postprocess_segmentation(self, model_output: torch.Tensor) -> np.ndarray:
         """Convert model output to segmentation mask."""
-        # Get class predictions
+        # Get class predictions along the channel dimension
         predictions = torch.argmax(model_output, dim=1)
         
-        # Convert to numpy array
+        # Convert to numpy array and remove batch dimension
         mask = predictions.cpu().numpy().squeeze()
         
         return mask
@@ -139,22 +140,24 @@ class LaparoscopicImageProcessor:
         Returns:
             List of ROI bounding boxes as (x, y, width, height)
         """
-        # Placeholder implementation - would be replaced with actual ROI detection
-        # For example, using color thresholding, contour detection, etc.
-        gray = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
-        blurred = cv2.GaussianBlur(gray, (5, 5), 0)
-        _, thresholded = cv2.threshold(blurred, 100, 255, cv2.THRESH_BINARY)
+        # Convert to grayscale and apply Gaussian blur
+        gray = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)  # pylint: disable=no-member
+        blurred = cv2.GaussianBlur(gray, (5, 5), 0)  # pylint: disable=no-member
+        _, thresholded = cv2.threshold(blurred, 100, 255, cv2.THRESH_BINARY)  # pylint: disable=no-member
         
-        # Find contours in the thresholded image
-        contours, _ = cv2.findContours(thresholded, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        
-        # Filter contours by size
+        # Find contours in the thresholded image.
+        try:
+            contours, _ = cv2.findContours(thresholded, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)  # pylint: disable=no-member
+        except ValueError:
+            _, contours, _ = cv2.findContours(thresholded, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)  # pylint: disable=no-member
+
+        # Filter contours by minimum area
         min_area = 1000  # Minimum contour area to consider
         rois = []
         for contour in contours:
-            area = cv2.contourArea(contour)
+            area = cv2.contourArea(contour)  # pylint: disable=no-member
             if area > min_area:
-                x, y, w, h = cv2.boundingRect(contour)
+                x, y, w, h = cv2.boundingRect(contour)  # pylint: disable=no-member
                 rois.append((x, y, w, h))
         
         return rois
@@ -171,7 +174,7 @@ class ImageEnhancement:
             params: Parameters for enhancement operations
         """
         self.params = params
-        self.clahe = cv2.createCLAHE(
+        self.clahe = cv2.createCLAHE(  # pylint: disable=no-member
             clipLimit=params.get("clahe_clip_limit", 2.0),
             tileGridSize=params.get("clahe_grid_size", (8, 8))
         )
@@ -187,19 +190,17 @@ class ImageEnhancement:
             Enhanced RGB image
         """
         # Convert to LAB color space
-        lab = cv2.cvtColor(image, cv2.COLOR_RGB2LAB)
+        lab = cv2.cvtColor(image, cv2.COLOR_RGB2LAB)  # pylint: disable=no-member
         
-        # Apply CLAHE to L channel
-        l, a, b = cv2.split(lab)
-        l_enhanced = self.clahe.apply(l)
+        # Apply CLAHE to the L channel
+        l, a, b = cv2.split(lab)  # pylint: disable=no-member
+        l_enhanced = self.clahe.apply(l)  # pylint: disable=no-member
         
-        # Merge channels back
-        lab_enhanced = cv2.merge((l_enhanced, a, b))
-        
-        # Convert back to RGB
-        enhanced = cv2.cvtColor(lab_enhanced, cv2.COLOR_LAB2RGB)
-        
-        # Apply additional enhancements if configured
+        # Merge channels back and convert to RGB
+        lab_enhanced = cv2.merge((l_enhanced, a, b))  # pylint: disable=no-member
+        enhanced = cv2.cvtColor(lab_enhanced, cv2.COLOR_LAB2RGB)  # pylint: disable=no-member
+
+        # Optionally apply additional enhancements
         if self.params.get("sharpen", False):
             enhanced = self._sharpen_image(enhanced)
         
@@ -213,11 +214,11 @@ class ImageEnhancement:
         kernel = np.array([[-1, -1, -1],
                            [-1,  9, -1],
                            [-1, -1, -1]])
-        return cv2.filter2D(image, -1, kernel)
+        return cv2.filter2D(image, -1, kernel)  # pylint: disable=no-member
     
     def _denoise_image(self, image: np.ndarray) -> np.ndarray:
         """Apply denoising to the image."""
-        return cv2.fastNlMeansDenoisingColored(
+        return cv2.fastNlMeansDenoisingColored(  # pylint: disable=no-member
             image,
             None,
             h=self.params.get("denoise_h", 10),
@@ -249,12 +250,7 @@ class StereoscopicProcessor:
         self.stereo_matcher = None
         
         # Initialize stereo matcher
-        self._initialize_stereo_matcher()
-    
-    def _initialize_stereo_matcher(self):
-        """Initialize the stereo matching algorithm."""
-        # Uses Semi-Global Block Matching by default
-        self.stereo_matcher = cv2.StereoSGBM_create(
+        self.stereo_matcher = cv2.StereoSGBM_create(  # pylint: disable=no-member
             minDisparity=self.config.get("min_disparity", 0),
             numDisparities=self.config.get("num_disparities", 64),
             blockSize=self.config.get("block_size", 5),
@@ -264,11 +260,11 @@ class StereoscopicProcessor:
             uniquenessRatio=self.config.get("uniqueness_ratio", 15),
             speckleWindowSize=self.config.get("speckle_window_size", 100),
             speckleRange=self.config.get("speckle_range", 2),
-            mode=self.config.get("mode", cv2.STEREO_SGBM_MODE_SGBM)
+            mode=self.config.get("mode", cv2.STEREO_SGBM_MODE_SGBM)  # pylint: disable=no-member
         )
     
-    def calibrate(self, left_images: List[np.ndarray], right_images: List[np.ndarray],
-                 pattern_size: Tuple[int, int] = (9, 6)) -> bool:
+    def calibrate(self, left_images: List[np.ndarray], right_images: List[np.ndarray], 
+                  pattern_size: Tuple[int, int] = (9, 6)) -> bool:
         """
         Calibrate stereo cameras using checkerboard pattern images.
         
@@ -280,46 +276,46 @@ class StereoscopicProcessor:
         Returns:
             True if calibration was successful, False otherwise
         """
-        # Find checkerboard corners
         obj_points = []
         img_points_left = []
         img_points_right = []
         
-        # Object points in 3D space
+        # Create object points for the checkerboard pattern
         objp = np.zeros((pattern_size[0] * pattern_size[1], 3), np.float32)
         objp[:, :2] = np.mgrid[0:pattern_size[0], 0:pattern_size[1]].T.reshape(-1, 2)
         
         for left_img, right_img in zip(left_images, right_images):
-            gray_left = cv2.cvtColor(left_img, cv2.COLOR_RGB2GRAY)
-            gray_right = cv2.cvtColor(right_img, cv2.COLOR_RGB2GRAY)
+            gray_left = cv2.cvtColor(left_img, cv2.COLOR_RGB2GRAY)  # pylint: disable=no-member
+            gray_right = cv2.cvtColor(right_img, cv2.COLOR_RGB2GRAY)  # pylint: disable=no-member
             
-            ret_left, corners_left = cv2.findChessboardCorners(gray_left, pattern_size, None)
-            ret_right, corners_right = cv2.findChessboardCorners(gray_right, pattern_size, None)
+            ret_left, corners_left = cv2.findChessboardCorners(gray_left, pattern_size, None)  # pylint: disable=no-member
+            ret_right, corners_right = cv2.findChessboardCorners(gray_right, pattern_size, None)  # pylint: disable=no-member
             
             if ret_left and ret_right:
-                # Refine corner positions
-                criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
-                corners_left = cv2.cornerSubPix(gray_left, corners_left, (11, 11), (-1, -1), criteria)
-                corners_right = cv2.cornerSubPix(gray_right, corners_right, (11, 11), (-1, -1), criteria)
-                
+                criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)  # pylint: disable=no-member
+                corners_left = cv2.cornerSubPix(gray_left, corners_left, (11, 11), (-1, -1), criteria)  # pylint: disable=no-member
+                corners_right = cv2.cornerSubPix(gray_right, corners_right, (11, 11), (-1, -1), criteria)  # pylint: disable=no-member
+
                 img_points_left.append(corners_left)
                 img_points_right.append(corners_right)
                 obj_points.append(objp)
         
+        # Ensure that at least one pattern was found
         if not img_points_left:
             return False
         
-        # Calibrate each camera individually
-        ret_left, self.camera_matrix_left, self.dist_coeffs_left, _, _ = cv2.calibrateCamera(
+        # Calibrate left camera
+        ret_left, self.camera_matrix_left, self.dist_coeffs_left, _, _ = cv2.calibrateCamera(  # pylint: disable=no-member
             obj_points, img_points_left, gray_left.shape[::-1], None, None
         )
         
-        ret_right, self.camera_matrix_right, self.dist_coeffs_right, _, _ = cv2.calibrateCamera(
+        # Calibrate right camera
+        ret_right, self.camera_matrix_right, self.dist_coeffs_right, _, _ = cv2.calibrateCamera(  # pylint: disable=no-member
             obj_points, img_points_right, gray_right.shape[::-1], None, None
         )
-        
+
         # Stereo calibration
-        ret, _, _, _, _, self.R, self.T, self.E, self.F = cv2.stereoCalibrate(
+        ret, _, _, _, _, self.R, self.T, self.E, self.F = cv2.stereoCalibrate(  # pylint: disable=no-member
             obj_points, img_points_left, img_points_right,
             self.camera_matrix_left, self.dist_coeffs_left,
             self.camera_matrix_right, self.dist_coeffs_right,
@@ -327,23 +323,23 @@ class StereoscopicProcessor:
         )
         
         # Compute rectification parameters
-        self.R1, self.R2, self.P1, self.P2, self.Q, _, _ = cv2.stereoRectify(
+        self.R1, self.R2, self.P1, self.P2, self.Q, _, _ = cv2.stereoRectify(  # pylint: disable=no-member
             self.camera_matrix_left, self.dist_coeffs_left,
             self.camera_matrix_right, self.dist_coeffs_right,
             gray_left.shape[::-1], self.R, self.T
         )
         
-        # Compute undistortion and rectification maps
-        self.map1_left, self.map2_left = cv2.initUndistortRectifyMap(
+        # Compute undistortion and rectification maps for left and right cameras
+        self.map1_left, self.map2_left = cv2.initUndistortRectifyMap(  # pylint: disable=no-member
             self.camera_matrix_left, self.dist_coeffs_left, self.R1, self.P1,
-            gray_left.shape[::-1], cv2.CV_32FC1
+            gray_left.shape[::-1], cv2.CV_32FC1  # pylint: disable=no-member
         )
         
-        self.map1_right, self.map2_right = cv2.initUndistortRectifyMap(
+        self.map1_right, self.map2_right = cv2.initUndistortRectifyMap(  # pylint: disable=no-member
             self.camera_matrix_right, self.dist_coeffs_right, self.R2, self.P2,
-            gray_right.shape[::-1], cv2.CV_32FC1
+            gray_right.shape[::-1], cv2.CV_32FC1  # pylint: disable=no-member
         )
-        
+
         self.calibrated = True
         return True
     
@@ -358,10 +354,10 @@ class StereoscopicProcessor:
         Returns:
             Disparity map
         """
-        # Convert to grayscale if needed
+        # Convert to grayscale if necessary
         if left_frame.ndim == 3:
-            left_gray = cv2.cvtColor(left_frame, cv2.COLOR_RGB2GRAY)
-            right_gray = cv2.cvtColor(right_frame, cv2.COLOR_RGB2GRAY)
+            left_gray = cv2.cvtColor(left_frame, cv2.COLOR_RGB2GRAY)  # pylint: disable=no-member
+            right_gray = cv2.cvtColor(right_frame, cv2.COLOR_RGB2GRAY)  # pylint: disable=no-member
         else:
             left_gray = left_frame
             right_gray = right_frame
@@ -374,7 +370,7 @@ class StereoscopicProcessor:
             left_rectified = left_gray
             right_rectified = right_gray
         
-        # Compute disparity
+        # Compute disparity and convert to float32 map
         disparity = self.stereo_matcher.compute(left_rectified, right_rectified).astype(np.float32) / 16.0
         
         return disparity
@@ -392,11 +388,9 @@ class StereoscopicProcessor:
         if not self.calibrated:
             raise ValueError("Stereo cameras must be calibrated before computing depth")
         
-        # Reproject points to 3D
-        points_3d = cv2.reprojectImageTo3D(disparity, self.Q)
-        
-        # Extract Z component (depth)
-        depth_map = points_3d[:, :, 2]
+        # Reproject pixels to 3D space
+        points_3d = cv2.reprojectImageTo3D(disparity, self.Q)  # pylint: disable=no-member
+        depth_map = points_3d[:, :, 2]  # Extract Z component as depth
         
         return depth_map
 
@@ -412,7 +406,7 @@ class IRFluorescenceProcessor:
         Initialize the IR fluorescence processor.
         
         Args:
-            threshold: Fluorescence detection threshold (0-1)
+            threshold: Fluorescence detection threshold (range 0-1)
         """
         self.threshold = threshold
     
@@ -424,22 +418,22 @@ class IRFluorescenceProcessor:
             frame: Grayscale or single-channel IR fluorescence image
             
         Returns:
-            Dictionary with processed results including fluorescence mask
+            Dictionary with processed results including fluorescence mask,
+            extracted contours, and normalized frame.
         """
-        # Ensure frame is properly formatted
+        # If the frame has multiple channels, assume the first channel contains the fluorescence signal.
         if frame.ndim > 2:
-            # Extract the channel containing fluorescence signal (typically red or NIR)
-            frame = frame[:, :, 0]  # Assuming channel 0 contains the fluorescence signal
+            frame = frame[:, :, 0]
         
-        # Normalize frame to [0, 1]
+        # Normalize frame to range [0, 1]
         normalized = frame.astype(np.float32)
         if normalized.max() > 0:
             normalized = normalized / normalized.max()
         
-        # Apply threshold to detect fluorescence
+        # Threshold to obtain binary fluorescence mask
         fluorescence_mask = normalized > self.threshold
         
-        # Find contours of fluorescent regions
+        # Find contours in the binary mask
         contours = self._find_fluorescent_contours(fluorescence_mask)
         
         return {
@@ -456,14 +450,15 @@ class IRFluorescenceProcessor:
             mask: Binary fluorescence mask
             
         Returns:
-            List of contours (each contour is a list of points)
+            List of contours (each contour is a numpy array of points)
         """
-        # Convert mask to uint8
-        mask_uint8 = mask.astype(np.uint8) * 255
-        
-        # Find contours
-        contours, _ = cv2.findContours(mask_uint8, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        
+        # Convert mask to uint8 for contour detection
+        mask_uint8 = (mask.astype(np.uint8)) * 255
+        try:
+            contours, _ = cv2.findContours(mask_uint8, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)  # pylint: disable=no-member
+        except Exception as e:
+            # Alternate calling convention for older OpenCV versions
+            _, contours, _ = cv2.findContours(mask_uint8, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)  # pylint: disable=no-member
         return contours
 
 
@@ -473,12 +468,11 @@ if __name__ == "__main__":
     config = {"use_enhancement": True, "enhancement_params": {"sharpen": True}}
     processor = LaparoscopicImageProcessor(config)
     
-    # Create a sample frame (would normally come from a camera)
+    # Create a sample frame (typically this comes directly from a laparoscopic camera)
     sample_frame = np.zeros((720, 1280, 3), dtype=np.uint8)
-    # Add some fake content
-    cv2.rectangle(sample_frame, (400, 300), (800, 500), (0, 255, 0), -1)
+    # Add some synthetic content
+    cv2.rectangle(sample_frame, (400, 300), (800, 500), (0, 255, 0), -1)  # pylint: disable=no-member
     
-    # Process frame
+    # Process frame and print regions of interest detected
     result = processor.process_frame(sample_frame)
-    
     print(f"Processed frame with {len(result['roi'])} regions of interest detected")

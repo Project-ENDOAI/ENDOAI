@@ -14,7 +14,13 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 if current_dir not in sys.path:
     sys.path.insert(0, current_dir)
 
-from model import get_unet_model
+# Try importing 'model' and handle import errors
+try:
+    from model import get_unet_model
+except ImportError as e:
+    print(f"Error importing 'model': {e}")
+    print("Ensure that 'model.py' exists in the same directory as this script.")
+    raise
 
 def train_model(dataset, epochs=10, batch_size=2, lr=1e-4, model_save_path="models/lesion_segmentation.pth"):
     """
@@ -64,8 +70,13 @@ if __name__ == "__main__":
     Example usage: Run this script to train the model.
     You should import or create your dataset before calling train_model.
     """
-    # Example: Import the preprocessing pipeline and create the dataset
-    from preprocessing_pipeline import create_preprocessed_dataset
+    # Try importing 'preprocessing_pipeline' and handle import errors
+    try:
+        from preprocessing_pipeline import create_preprocessed_dataset
+    except ImportError as e:
+        print(f"Error importing 'preprocessing_pipeline': {e}")
+        print("Ensure that 'preprocessing_pipeline.py' exists in the same directory as this script.")
+        raise
 
     # For early training, you can use a public dataset such as the Medical Segmentation Decathlon (MSD).
     # Download the "Task04_Hippocampus" or similar dataset from:

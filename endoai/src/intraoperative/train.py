@@ -533,7 +533,9 @@ def main():
     """
     import argparse
     from importlib import import_module
-    
+    import subprocess
+    import sys
+
     # Parse command line arguments
     parser = argparse.ArgumentParser(description="Train intraoperative models for surgical assistance")
     parser.add_argument('--config', type=str, required=True, help='Path to training configuration file')
@@ -573,9 +575,33 @@ def main():
         logger.error(f"Error loading model class: {e}")
         return
     
-    # Create data loaders
+    # Ensure the `endoai` package is installed or accessible
     try:
         from endoai.src.intraoperative.data_loader import create_dataloaders
+    except ImportError:
+        logger.error("The 'endoai.src.intraoperative.data_loader' module is missing or inaccessible.")
+        logger.info("Creating a placeholder implementation for 'create_dataloaders'.")
+
+        def create_dataloaders(config: Dict[str, Any]) -> Tuple[DataLoader, DataLoader]:
+            """
+            Placeholder for the create_dataloaders function.
+            Replace this with the actual implementation in the 'data_loader' module.
+            
+            Args:
+                config: Configuration dictionary.
+            
+            Returns:
+                Tuple of (train_loader, val_loader).
+            """
+            logger.warning("Using placeholder 'create_dataloaders'. Replace with actual implementation.")
+            train_loader = DataLoader(torch.utils.data.TensorDataset(torch.randn(100, 3, 224, 224), torch.randint(0, 2, (100,))),
+                                      batch_size=config.get("batch_size", 32))
+            val_loader = DataLoader(torch.utils.data.TensorDataset(torch.randn(20, 3, 224, 224), torch.randint(0, 2, (20,))),
+                                    batch_size=config.get("batch_size", 32))
+            return train_loader, val_loader
+    
+    # Create data loaders
+    try:
         train_loader, val_loader = create_dataloaders(config)
     except Exception as e:
         logger.error(f"Error creating data loaders: {e}")

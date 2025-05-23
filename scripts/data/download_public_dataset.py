@@ -1,5 +1,6 @@
 """
-Download a public medical imaging dataset (e.g., Medical Segmentation Decathlon Task04_Hippocampus).
+Download and extract the Medical Segmentation Decathlon Task04_Hippocampus dataset
+into the data/raw/ directory for use with ENDOAI.
 """
 
 import os
@@ -22,7 +23,7 @@ def download_and_extract(url, dest_dir):
         print("Extraction complete.")
 
 if __name__ == "__main__":
-    # Example: Medical Segmentation Decathlon Task04_Hippocampus
+    # Download to data/raw/
     url = "https://msd-for-monai.s3-us-west-2.amazonaws.com/Task04_Hippocampus.tar"
-    dest_dir = os.path.join(os.path.dirname(__file__), "..", "..", "data", "public")
+    dest_dir = os.path.join(os.path.dirname(__file__), "..", "..", "data", "raw")
     download_and_extract(url, dest_dir)

@@ -1,0 +1,52 @@
+# A .gitkeep file ensures that otherwise-empty directories are tracked by git.
+# Git does not track empty directories, so placing a .gitkeep file in a directory
+# allows it to be included in version control, even if it contains no other files.
+
+# keep README files in all directories
+
+# Root-level README
+README.md
+
+# Data directories
+endoai/data/README.md
+endoai/data/raw/README.md
+endoai/data/processed/README.md
+
+# Models directory
+endoai/models/README.md
+
+# Notebooks directory
+endoai/notebooks/README.md
+
+# Pipelines directory
+endoai/pipelines/README.md
+
+# Source code directories
+endoai/src/README.md
+endoai/src/preoperative/README.md
+endoai/src/intraoperative/README.md
+endoai/src/decision_support/README.md
+endoai/src/reporting/README.md
+
+# Tests directory
+endoai/tests/README.md
+
+# Installation directory
+endoai/install/README.md
+
+# Scripts directories
+scripts/README.md
+scripts/data/README.md
+scripts/train/README.md
+scripts/deploy/README.md
+scripts/git/README.md
+scripts/utils/README.md
+
+# Validation directory
+validation/README.md
+
+# Output directory
+output/README.md
+
+# Wandb directory
+wandb/README.md

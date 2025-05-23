@@ -12,8 +12,15 @@ endoai/models/
 endoai/notebooks/
 endoai/pipelines/
 
+# Ignore all data (including raw and public)
+data/*
+endoai/data/*
+
 # Ignore output folder
 output/
+
+# Ignore wandb logs and runs
+wandb/*
 
 # Ignore model weights and large files in models/
 endoai/models/*.pth
